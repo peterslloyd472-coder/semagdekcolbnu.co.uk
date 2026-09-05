@@ -10,8 +10,20 @@ export default defineConfig(() => {
         name: 'redirect-main-jx',
         configureServer(server) {
           server.middlewares.use((req, res, next) => {
-            if (req.url && req.url.includes('main.jx')) {
-              req.url = req.url.replace('main.jx', 'main.jsx');
+            if (req.url) {
+              const urlPath = req.url.split('?')[0];
+              if (
+                urlPath === '/main.jx' ||
+                urlPath === '/main.jsx' ||
+                urlPath === '/main.js' ||
+                urlPath === '/main.tsx' ||
+                urlPath === '/src/main.jx' ||
+                urlPath === '/src/main.js' ||
+                urlPath === '/src/main.tsx'
+              ) {
+                const query = req.url.includes('?') ? '?' + req.url.split('?')[1] : '';
+                req.url = '/src/main.jsx' + query;
+              }
             }
             next();
           });
