@@ -6,18 +6,34 @@ import { GamePlayer } from './components/GamePlayer.jsx';
 import { AddGameModal } from './components/AddGameModal.jsx';
 import { JsonViewerModal } from './components/JsonViewerModal.jsx';
 import { PanicScreen } from './components/PanicScreen.jsx';
+import { AuthModal } from './components/AuthModal.jsx';
+import { useAuth } from './context/AuthContext.jsx';
 import { Sparkles, Gamepad2, Search, SlidersHorizontal, Grid, List, Star, ShieldCheck, Heart } from 'lucide-react';
 
 const STORAGE_GAMES_KEY = 'semagdekcolbnu_games_v1';
 const STORAGE_FAVS_KEY = 'semagdekcolbnu_favs_v1';
 
 export default function App() {
+  const { currentUser, userProfile, updateUserData } = useAuth();
+  const [authModalConfig, setAuthModalConfig] = useState({ isOpen: false, mode: 'login' });
+
   const [games, setGames] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_GAMES_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const defaultMap = new Map(DEFAULT_GAMES.map((g) => [g.id, g]));
+          const merged = parsed.map((g) => {
+            if (defaultMap.has(g.id)) {
+              return { ...defaultMap.get(g.id), ...g, description: defaultMap.get(g.id).description, controls: defaultMap.get(g.id).controls, author: defaultMap.get(g.id).author, thumbnailGradient: defaultMap.get(g.id).thumbnailGradient };
+            }
+            return g;
+          });
+          const existingIds = new Set(merged.map((g) => g.id));
+          const missingDefaults = DEFAULT_GAMES.filter((g) => !existingIds.has(g.id));
+          return [...merged, ...missingDefaults];
+        }
       }
     } catch (e) {
       console.error("Failed to load saved games:", e);
@@ -45,6 +61,22 @@ export default function App() {
   const [isJsonModalOpen, setIsJsonModalOpen] = useState(false);
   const [isPanicActive, setIsPanicActive] = useState(false);
 
+  // When user signs in, sync their cloud favorites & custom games from Firestore
+  useEffect(() => {
+    if (currentUser && userProfile) {
+      if (Array.isArray(userProfile.favorites) && userProfile.favorites.length > 0) {
+        setFavorites(userProfile.favorites);
+      }
+      if (Array.isArray(userProfile.customGames) && userProfile.customGames.length > 0) {
+        setGames(prev => {
+          const existingIds = new Set(prev.map(g => g.id));
+          const newCustoms = userProfile.customGames.filter(g => !existingIds.has(g.id));
+          return [...newCustoms, ...prev];
+        });
+      }
+    }
+  }, [currentUser, userProfile?.updatedAt]);
+
   // Sync games to localStorage
   useEffect(() => {
     try {
@@ -54,7 +86,7 @@ export default function App() {
     }
   }, [games]);
 
-  // Sync favorites to localStorage
+  // Sync favorites to localStorage & Firestore if signed in
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_FAVS_KEY, JSON.stringify(favorites));
@@ -75,13 +107,21 @@ export default function App() {
   }, []);
 
   const handleToggleFavorite = (gameId) => {
-    setFavorites(prev =>
-      prev.includes(gameId) ? prev.filter(id => id !== gameId) : [...prev, gameId]
-    );
+    setFavorites(prev => {
+      const next = prev.includes(gameId) ? prev.filter(id => id !== gameId) : [...prev, gameId];
+      if (currentUser) {
+        updateUserData({ favorites: next });
+      }
+      return next;
+    });
   };
 
   const handleAddGame = (newGame) => {
     setGames(prev => [newGame, ...prev]);
+    if (currentUser) {
+      const existingCustom = userProfile?.customGames || [];
+      updateUserData({ customGames: [newGame, ...existingCustom] });
+    }
   };
 
   const handleImportJson = (newGames) => {
@@ -91,6 +131,10 @@ export default function App() {
   const handleResetDefaults = () => {
     setGames(DEFAULT_GAMES);
     localStorage.removeItem(STORAGE_GAMES_KEY);
+  };
+
+  const handleOpenAuth = (mode = 'login') => {
+    setAuthModalConfig({ isOpen: true, mode });
   };
 
   // Filter & sort games
@@ -158,6 +202,7 @@ export default function App() {
         showFavoritesOnly={showFavoritesOnly}
         onToggleFavorites={() => setShowFavoritesOnly(!showFavoritesOnly)}
         favoritesCount={favorites.length}
+        onOpenAuthModal={handleOpenAuth}
       />
 
       {/* Main Content Area */}
@@ -357,6 +402,13 @@ export default function App() {
         games={games}
         onImportJson={handleImportJson}
         onResetDefaults={handleResetDefaults}
+      />
+
+      {/* Firebase Sign In & Sign Up Modal */}
+      <AuthModal
+        isOpen={authModalConfig.isOpen}
+        initialMode={authModalConfig.mode}
+        onClose={() => setAuthModalConfig(prev => ({ ...prev, isOpen: false }))}
       />
     </div>
   );

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, Star, Sparkles, Gamepad2, Grid, Zap, Boxes, Feather, Crosshair, Trophy, Shield, AlertTriangle, Hexagon } from 'lucide-react';
+import { Play, Star, Sparkles, Gamepad2, Grid, Zap, Boxes, Feather, Crosshair, Trophy, Shield, AlertTriangle, Hexagon, Gauge } from 'lucide-react';
 
 const ICON_MAP = {
   Gamepad2: <Gamepad2 className="w-8 h-8 text-white/90" />,
@@ -12,6 +12,7 @@ const ICON_MAP = {
   Shield: <Shield className="w-8 h-8 text-white/90" />,
   AlertTriangle: <AlertTriangle className="w-8 h-8 text-white/90" />,
   Hexagon: <Hexagon className="w-8 h-8 text-white/90" />,
+  Gauge: <Gauge className="w-8 h-8 text-white/90" />,
 };
 
 export const GameCard = ({

@@ -1,0 +1,63 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with game stats, favorites, and settings",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The unique Firebase Auth UID"
+        },
+        "email": {
+          "type": "string",
+          "description": "User email address"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Display username"
+        },
+        "avatar": {
+          "type": "string",
+          "description": "Avatar preset or emoji identifier"
+        },
+        "favorites": {
+          "type": "array",
+          "description": "List of favorite game IDs",
+          "items": {
+            "type": "string"
+          }
+        },
+        "customGames": {
+          "type": "array",
+          "description": "List of custom added games by this user",
+          "items": {
+            "type": "object"
+          }
+        },
+        "recentPlayed": {
+          "type": "array",
+          "description": "Recently launched game IDs with timestamps",
+          "items": {
+            "type": "object"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["userId", "email"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "entity": "UserProfile",
+      "description": "Individual user document containing favorites, custom games, and stats"
+    }
+  }
+}

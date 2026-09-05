@@ -138,5 +138,19 @@
     "tags": ["puzzle", "hexagon", "tetris", "hextris"],
     "featured": true,
     "author": "Logan Engstrom & Garrett Finucane"
+  },
+  {
+    "id": "highway-traffic",
+    "title": "Highway Traffic",
+    "category": "Racing",
+    "description": "The original 3D Unity Highway Traffic game by FreezeNova! Pick your car, choose sunny, rainy, or night weather, and take on One Way, Two-Way, Time Attack, or Speed Bomb mode.",
+    "iframeUrl": "/games/2022/unity/highway-traffic/game.html",
+    "aspectRatio": "16/9",
+    "thumbnailGradient": "from-amber-600 via-red-600 to-slate-950",
+    "icon": "Gauge",
+    "controls": ["W or Up Arrow to accelerate", "A / D or Left / Right to steer", "Space Bar for handbrake", "Left Shift or F for boost"],
+    "tags": ["racing", "highway", "traffic", "unity", "cars", "speed", "3d"],
+    "featured": true,
+    "author": "FreezeNova"
   }
 ]

@@ -1,6 +1,6 @@
 {
   "name": "semagdekcolbnu.co.uk",
-  "description": "A lightweight and fast unblocked games portal loading web games via iframe from a configurable JSON catalog.",
+  "description": "A lightweight and fast unblocked games portal loading web games via iframe from a configurable JSON catalog with user accounts and cloud-synced favorites.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

@@ -1,7 +1,8 @@
 import React from 'react';
 import { Gamepad2, Search, Plus, FileCode2, ShieldAlert, Star, Sparkles } from 'lucide-react';
+import { UserProfileBadge } from './UserProfileBadge.jsx';
 
-const CATEGORIES = ['All', 'Arcade', 'Puzzle', 'Action', 'Retro', 'Sports', 'Strategy'];
+const CATEGORIES = ['All', 'Arcade', 'Puzzle', 'Action', 'Racing', 'Retro', 'Sports', 'Strategy'];
 
 export const Header = ({
   searchQuery,
@@ -14,7 +15,8 @@ export const Header = ({
   totalGamesCount,
   showFavoritesOnly,
   onToggleFavorites,
-  favoritesCount
+  favoritesCount,
+  onOpenAuthModal
 }) => {
   return (
     <header className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
@@ -40,16 +42,16 @@ export const Header = ({
               </div>
             </div>
 
-            {/* Mobile Panic Shortcut */}
+            {/* Mobile Actions: Profile & Panic Shortcut */}
             <div className="flex md:hidden items-center gap-2">
+              <UserProfileBadge onOpenAuthModal={onOpenAuthModal} />
               <button
                 id="mobilePanicBtn"
                 onClick={onTriggerPanic}
                 title="Stealth Panic Mode (Esc)"
-                className="px-2.5 py-1.5 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 text-xs font-semibold flex items-center gap-1.5 active:scale-95"
+                className="px-2 py-1.5 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 text-xs font-semibold flex items-center gap-1 active:scale-95"
               >
                 <ShieldAlert className="w-3.5 h-3.5" />
-                <span>Panic</span>
               </button>
             </div>
           </div>
@@ -118,6 +120,11 @@ export const Header = ({
               <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />
               <span>Panic (Esc)</span>
             </button>
+
+            {/* Desktop User Profile Badge */}
+            <div className="hidden md:block pl-1 border-l border-slate-800">
+              <UserProfileBadge onOpenAuthModal={onOpenAuthModal} />
+            </div>
           </div>
         </div>
 

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Highway Traffic</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+    <script src="TemplateData/UnityProgress.js"></script>
+    <script src="Build/UnityLoader.js"></script>
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #111;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .webgl-content {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        top: 0;
+        left: 0;
+        transform: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #gameContainer {
+        width: 100% !important;
+        height: 100% !important;
+        display: block;
+      }
+      #gameContainer canvas {
+        width: 100% !important;
+        height: 100% !important;
+        display: block;
+      }
+    </style>
+    <script>
+      function SubmitLeaderboardScore(newScore) {}
+      function GetLeaderboardEntries() {}
+      function InitApi(_appId) {}
+      function InitExternEval(_appId) {}
+      function ExternEval() {}
+      function ExternEvalResumeGame() {
+        if (window.gameInstance) {
+          window.gameInstance.SendMessage('FreezeNovaAPI', 'AdMessage', 'onClose');
+        }
+      }
+      function PreloadRewarded() {}
+      function ShowRewarded() {
+        if (window.gameInstance) {
+          window.gameInstance.SendMessage('FreezeNovaAPI', 'AdMessage', 'RewardedOnRewarded');
+          window.gameInstance.SendMessage('FreezeNovaAPI', 'AdMessage', 'onClose');
+        }
+      }
+      function RewardedReady() {
+        if (window.gameInstance) {
+          window.gameInstance.SendMessage('FreezeNovaAPI', 'RewardedReady');
+        }
+      }
+
+      function FitScreen() {
+        var container = document.getElementById("gameContainer");
+        if (container) {
+          container.style.width = window.innerWidth + "px";
+          container.style.height = window.innerHeight + "px";
+        }
+      }
+      window.addEventListener('resize', FitScreen);
+      window.addEventListener('load', FitScreen);
+    </script>
+  </head>
+  <body>
+    <div class="webgl-content">
+      <div id="gameContainer"></div>
+    </div>
+    <script>
+      var gameInstance = UnityLoader.instantiate("gameContainer", "Build/game.json", {
+        onProgress: UnityProgress
+      });
+      window.gameInstance = gameInstance;
+    </script>
+  </body>
+</html>
