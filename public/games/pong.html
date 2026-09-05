@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arcade Pong</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      background: #09090b;
+      color: #fafafa;
+      font-family: 'Courier New', Courier, monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    .hud {
+      display: flex;
+      gap: 40px;
+      font-size: 36px;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+    canvas {
+      background: #18181b;
+      border: 3px solid #27272a;
+      border-radius: 8px;
+    }
+    .mode-bar {
+      margin-top: 14px;
+      display: flex;
+      gap: 12px;
+    }
+    button {
+      background: #27272a;
+      color: #fafafa;
+      border: 1px solid #3f3f46;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-family: system-ui, sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    button.active {
+      background: #3b82f6;
+      border-color: #60a5fa;
+    }
+    .hint {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #a1a1aa;
+      font-family: system-ui, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div class="hud">
+    <span id="score1">0</span>
+    <span>:</span>
+    <span id="score2">0</span>
+  </div>
+
+  <canvas id="pongCanvas" width="540" height="360"></canvas>
+
+  <div class="mode-bar">
+    <button id="btn1P" class="active" onclick="setMode('1P')">1 Player (vs CPU)</button>
+    <button id="btn2P" onclick="setMode('2P')">2 Players (Local)</button>
+  </div>
+
+  <div class="hint" id="hint">P1: <strong>W / S</strong> or Mouse | CPU: Auto</div>
+
+  <script>
+    const canvas = document.getElementById('pongCanvas');
+    const ctx = canvas.getContext('2d');
+    const score1El = document.getElementById('score1');
+    const score2El = document.getElementById('score2');
+    const hintEl = document.getElementById('hint');
+    const btn1P = document.getElementById('btn1P');
+    const btn2P = document.getElementById('btn2P');
+
+    let mode = '1P';
+    let score1 = 0;
+    let score2 = 0;
+
+    const pHeight = 64;
+    const pWidth = 10;
+
+    const p1 = { x: 15, y: 150, dy: 0, speed: 6 };
+    const p2 = { x: canvas.width - 25, y: 150, dy: 0, speed: 5.5 };
+    const ball = { x: canvas.width / 2, y: canvas.height / 2, radius: 5, dx: 4, dy: 3 };
+
+    function setMode(m) {
+      mode = m;
+      btn1P.className = m === '1P' ? 'active' : '';
+      btn2P.className = m === '2P' ? 'active' : '';
+      hintEl.innerHTML = m === '1P'
+        ? 'P1: <strong>W / S</strong> or Mouse | CPU: Auto'
+        : 'P1: <strong>W / S</strong> | P2: <strong>UP / DOWN</strong> Arrows';
+      resetGame();
+    }
+
+    function resetBall(servingToP2) {
+      ball.x = canvas.width / 2;
+      ball.y = canvas.height / 2;
+      ball.dx = servingToP2 ? 4 : -4;
+      ball.dy = (Math.random() * 4 - 2);
+    }
+
+    function resetGame() {
+      score1 = 0;
+      score2 = 0;
+      score1El.innerText = score1;
+      score2El.innerText = score2;
+      resetBall(true);
+    }
+
+    const keys = {};
+    window.addEventListener('keydown', e => { keys[e.code] = true; });
+    window.addEventListener('keyup', e => { keys[e.code] = false; });
+
+    canvas.addEventListener('mousemove', e => {
+      if (mode === '1P') {
+        const rect = canvas.getBoundingClientRect();
+        p1.y = e.clientY - rect.top - pHeight / 2;
+      }
+    });
+
+    function update() {
+      // P1 controls
+      if (keys['KeyW']) p1.y -= p1.speed;
+      if (keys['KeyS']) p1.y += p1.speed;
+      p1.y = Math.max(0, Math.min(canvas.height - pHeight, p1.y));
+
+      // P2 controls
+      if (mode === '1P') {
+        // CPU tracker logic with smooth interpolation
+        const targetY = ball.y - pHeight / 2;
+        p2.y += (targetY - p2.y) * 0.085;
+      } else {
+        if (keys['ArrowUp']) p2.y -= p2.speed;
+        if (keys['ArrowDown']) p2.y += p2.speed;
+      }
+      p2.y = Math.max(0, Math.min(canvas.height - pHeight, p2.y));
+
+      // Ball movement
+      ball.x += ball.dx;
+      ball.y += ball.dy;
+
+      // Top/bottom bounce
+      if (ball.y < ball.radius || ball.y > canvas.height - ball.radius) {
+        ball.dy = -ball.dy;
+      }
+
+      // P1 paddle hit
+      if (ball.x - ball.radius <= p1.x + pWidth && ball.x + ball.radius >= p1.x) {
+        if (ball.y >= p1.y && ball.y <= p1.y + pHeight) {
+          ball.dx = Math.abs(ball.dx) * 1.05;
+          const hit = (ball.y - (p1.y + pHeight / 2)) / (pHeight / 2);
+          ball.dy = hit * 5;
+        }
+      }
+
+      // P2 paddle hit
+      if (ball.x + ball.radius >= p2.x && ball.x - ball.radius <= p2.x + pWidth) {
+        if (ball.y >= p2.y && ball.y <= p2.y + pHeight) {
+          ball.dx = -Math.abs(ball.dx) * 1.05;
+          const hit = (ball.y - (p2.y + pHeight / 2)) / (pHeight / 2);
+          ball.dy = hit * 5;
+        }
+      }
+
+      // Scoring
+      if (ball.x < 0) {
+        score2++;
+        score2El.innerText = score2;
+        resetBall(true);
+      } else if (ball.x > canvas.width) {
+        score1++;
+        score1El.innerText = score1;
+        resetBall(false);
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Center dashed net
+      ctx.strokeStyle = '#3f3f46';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 6]);
+      ctx.beginPath();
+      ctx.moveTo(canvas.width / 2, 0);
+      ctx.lineTo(canvas.width / 2, canvas.height);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // P1 Paddle
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(p1.x, p1.y, pWidth, pHeight);
+
+      // P2 Paddle
+      ctx.fillStyle = '#f43f5e';
+      ctx.fillRect(p2.x, p2.y, pWidth, pHeight);
+
+      // Ball
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function loop() {
+      update();
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    loop();
+  </script>
+</body>
+</html>
